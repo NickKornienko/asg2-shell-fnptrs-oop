@@ -1,0 +1,10 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ mkc: starting virtual-trace.cpp
+$Id: virtual-trace.cpp,v 1.21 2022-01-24 14:07:38-08 - - $
+checksource virtual-trace.cpp
+checksource: TOTAL COMPLAINTS: 0
+virtual-trace.cpp: $Id: virtual-trace.cpp,v 1.21 2022-01-24 14:07:38-08 - - $
+cpplint.py.perl virtual-trace.cpp
+Done processing virtual-trace.cpp
+g++ -Wall -Wextra -Wpedantic -Wshadow -fdiagnostics-color=never -std=gnu++2a -Wold-style-cast -pthread -g -O0 virtual-trace.cpp -o virtual-trace -lm
+rm -f virtual-trace.o
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ mkc: finished virtual-trace.cpp

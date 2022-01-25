@@ -1,0 +1,26 @@
+==26771== Memcheck, a memory error detector
+==26771== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==26771== Using Valgrind-3.17.0 and LibVEX; rerun with -h for copyright info
+==26771== Command: listfree -f
+==26771== 
+Command: listfree -f
+node::node(int, node_ptr): 0x5c450b0->node(3,{0,0})
+node::node(int, node_ptr): 0x5c45120->node(2,{0x5c450b0,3})
+node::node(int, node_ptr): 0x5c45190->node(1,{0x5c45120,3})
+list = {0x5c45190,3}
+{0x5c45190,4} -> curr: 0x5c45190->node(1,{0x5c45120,2})
+{0x5c45120,3} -> curr: 0x5c45120->node(2,{0x5c450b0,2})
+{0x5c450b0,3} -> curr: 0x5c450b0->node(3,{0x5c45190,3})
+node::~node(): 0x5c45120->node(2,{0x5c450b0,2})
+node::~node(): 0x5c450b0->node(3,{0x5c45190,3})
+int main(int, char**): return 0;
+node::~node(): 0x5c45190->node(1,{0,0})
+==26771== 
+==26771== HEAP SUMMARY:
+==26771==     in use at exit: 0 bytes in 0 blocks
+==26771==   total heap usage: 4 allocs, 4 frees, 147 bytes allocated
+==26771== 
+==26771== All heap blocks were freed -- no leaks are possible
+==26771== 
+==26771== For lists of detected and suppressed errors, rerun with: -s
+==26771== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

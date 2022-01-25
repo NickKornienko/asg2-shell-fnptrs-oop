@@ -1,0 +1,41 @@
+==10829== Memcheck, a memory error detector
+==10829== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==10829== Using Valgrind-3.17.0 and LibVEX; rerun with -h for copyright info
+==10829== Command: virtual-trace
+==10829== 
+[int main()] Before push_back ...
+[object::object()] 0x5c45050->object:id=0
+[circle::circle(size_t)] 0x5c45050->circle:id=0, radius=5
+[object::object()] 0x5c45270->object:id=1
+[square::square(size_t)] 0x5c45270->square:id=1, width=5
+[object::object()] 0x5c454a0->object:id=2
+[circle::circle(size_t)] 0x5c454a0->circle:id=2, radius=10
+[object::object()] 0x5c456f0->object:id=3
+[square::square(size_t)] 0x5c456f0->square:id=3, width=10
+
+[int main()] Before for first for loop ...
+[int main()] 0x5c45050->circle:id=0, radius=5 ...area=78.5398
+[int main()] 0x5c45270->square:id=1, width=5 ...area=25
+[int main()] 0x5c454a0->circle:id=2, radius=10 ...area=314.159
+[int main()] 0x5c456f0->square:id=3, width=10 ...area=100
+
+[int main()] Before pop_back for loop ...
+[virtual square::~square()] 0x5c456f0->square:id=3, width=10
+[virtual object::~object()] 0x5c456f0->object:id=3
+[virtual circle::~circle()] 0x5c454a0->circle:id=2, radius=10
+[virtual object::~object()] 0x5c454a0->object:id=2
+
+[int main()] Before return 0 ...
+[virtual circle::~circle()] 0x5c45050->circle:id=0, radius=5
+[virtual object::~object()] 0x5c45050->object:id=0
+[virtual square::~square()] 0x5c45270->square:id=1, width=5
+[virtual object::~object()] 0x5c45270->object:id=1
+==10829== 
+==10829== HEAP SUMMARY:
+==10829==     in use at exit: 0 bytes in 0 blocks
+==10829==   total heap usage: 47 allocs, 47 frees, 1,052 bytes allocated
+==10829== 
+==10829== All heap blocks were freed -- no leaks are possible
+==10829== 
+==10829== For lists of detected and suppressed errors, rerun with: -s
+==10829== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

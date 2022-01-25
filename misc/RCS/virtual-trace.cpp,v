@@ -1,0 +1,658 @@
+head	1.21;
+access;
+symbols;
+locks;
+comment	@// @;
+
+
+1.21
+date	2022.01.24.22.07.38;	author -;	state -;
+branches;
+next	1.20;
+
+1.20
+date	2022.01.24.22.07.01;	author -;	state -;
+branches;
+next	1.19;
+
+1.19
+date	2022.01.15.07.04.19;	author -;	state -;
+branches;
+next	1.18;
+
+1.18
+date	2022.01.15.07.02.17;	author -;	state -;
+branches;
+next	1.17;
+
+1.17
+date	2022.01.15.07.01.49;	author -;	state -;
+branches;
+next	1.16;
+
+1.16
+date	2022.01.15.07.00.50;	author -;	state -;
+branches;
+next	1.15;
+
+1.15
+date	2022.01.15.05.36.55;	author -;	state -;
+branches;
+next	1.14;
+
+1.14
+date	2022.01.15.05.35.24;	author -;	state -;
+branches;
+next	1.13;
+
+1.13
+date	2022.01.15.05.34.10;	author -;	state -;
+branches;
+next	1.12;
+
+1.12
+date	2022.01.15.04.48.42;	author -;	state -;
+branches;
+next	1.11;
+
+1.11
+date	2021.10.19.17.22.35;	author -;	state -;
+branches;
+next	1.10;
+
+1.10
+date	2021.10.19.17.21.12;	author -;	state -;
+branches;
+next	1.9;
+
+1.9
+date	2021.10.19.17.08.17;	author -;	state -;
+branches;
+next	1.8;
+
+1.8
+date	2021.10.19.17.06.14;	author -;	state -;
+branches;
+next	1.7;
+
+1.7
+date	2021.10.19.17.02.06;	author -;	state -;
+branches;
+next	1.6;
+
+1.6
+date	2021.10.19.17.01.32;	author -;	state -;
+branches;
+next	1.5;
+
+1.5
+date	2021.10.19.16.53.42;	author -;	state -;
+branches;
+next	1.4;
+
+1.4
+date	2021.10.19.16.52.55;	author -;	state -;
+branches;
+next	1.3;
+
+1.3
+date	2021.10.19.16.52.19;	author -;	state -;
+branches;
+next	1.2;
+
+1.2
+date	2021.10.19.16.50.57;	author -;	state -;
+branches;
+next	1.1;
+
+1.1
+date	2021.10.19.16.42.59;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.21
+log
+@-
+@
+text
+@// $Id: virtual-trace.cpp,v 1.20 2022-01-24 14:07:01-08 - - $
+
+//
+// Example using objects, with a base object and two derived objects.
+// Similar to inheritance2, but uses gcc demangler.
+//
+
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <typeinfo>
+#include <vector>
+using namespace std;
+
+#define LOG cout << "[" << __PRETTY_FUNCTION__ << "] "
+
+#include <cxxabi.h>
+template <typename type>
+string demangle_typeid (const type& object) {
+   const char* name = typeid(object).name();
+   int status = 0;
+   unique_ptr<char,decltype(&std::free)> result {
+      abi::__cxa_demangle (name, nullptr, nullptr, &status),
+      std::free,
+   };
+   return status == 0 ? result.get() : name;
+}
+
+
+/////////////////////////////////////////////////////////////////
+// class object
+/////////////////////////////////////////////////////////////////
+
+class object {
+   private:
+      static size_t next_id;
+   protected:
+      const size_t id;
+      object(); // abstract class, so only derived can used ctor.
+   public:
+      object (const object&) = delete;            // no copying
+      object& operator= (const object&) = delete; // no copying
+      virtual ~object(); // must be virtual
+      virtual ostream& print (ostream&) const;
+      virtual double area() const = 0;
+};
+size_t object::next_id = 0;
+
+ostream& operator<< (ostream& out, const object& obj) {
+   return obj.print (out);
+}
+
+object::object(): id(next_id++) {
+   LOG << *this << endl;
+}
+
+object::~object() {
+   LOG << *this << endl;
+}
+
+ostream& object::print (ostream& out) const {
+   return out << static_cast<const void*> (this) << "->"
+              << demangle_typeid(*this) << ":id=" << id;
+}
+
+
+/////////////////////////////////////////////////////////////////
+// class square 
+/////////////////////////////////////////////////////////////////
+
+class square: public object {
+   private:
+      double width;
+   public:
+      explicit square (size_t width);
+      virtual ~square();
+      virtual ostream& print (ostream&) const override;
+      virtual double area() const override;
+};
+
+square::square (size_t width_): width(width_) {
+   LOG << *this << endl;
+}
+
+square::~square() {
+   LOG << *this << endl;
+}
+
+ostream& square::print (ostream& out) const {
+   return this->object::print (out) << ", width=" << width;
+}
+
+double square::area() const {
+   return pow (width, 2.0);
+}
+
+
+/////////////////////////////////////////////////////////////////
+// class circle 
+/////////////////////////////////////////////////////////////////
+
+class circle: public object {
+   private:
+      double radius;
+   public:
+      explicit circle (size_t radius);
+      virtual ~circle();
+      virtual ostream& print (ostream&) const override;
+      virtual double area() const override;
+};
+
+circle::circle (size_t radius_): radius(radius_) {
+   LOG << *this << endl;
+}
+
+circle::~circle() {
+   LOG << *this << endl;
+}
+
+ostream& circle::print (ostream& out) const {
+   return this->object::print (out) << ", radius=" << radius;
+}
+
+double circle::area() const {
+   return M_PI * pow (radius, 2.0);
+}
+
+
+/////////////////////////////////////////////////////////////////
+// main
+/////////////////////////////////////////////////////////////////
+
+int main() {
+
+   vector<shared_ptr<object>> vec;
+   LOG << "Before push_back ..." << endl;
+   vec.push_back (make_shared<circle> ( 5));
+   vec.push_back (make_shared<square> ( 5));
+   vec.push_back (make_shared<circle> (10));
+   vec.push_back (make_shared<square> (10));
+   cout << endl;
+
+   LOG << "Before for first for loop ..." << endl;
+   for (const auto& ptr: vec) {
+      LOG << *ptr << " ...area=" << ptr->area() << endl;
+   }
+   cout << endl;
+
+   LOG << "Before pop_back for loop ..." << endl;
+   vec.pop_back();
+   vec.pop_back();
+   cout << endl;
+
+   LOG << "Before return 0 ..." << endl;
+   return 0;
+}
+
+//TEST// valgrind virtual-trace >virtual-trace.out 2>&1
+//TEST// mkpspdf virtual-trace.ps virtual-trace.cpp virtual-trace.out
+
+@
+
+
+1.20
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.19 2022-01-14 23:04:19-08 - - $
+d122 1
+a122 1
+   return this->object::print (out) << ",radius=" << radius;
+@
+
+
+1.19
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.18 2022-01-14 23:02:17-08 - - $
+a134 1
+   cout << setprecision(15);
+@
+
+
+1.18
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.17 2022-01-14 23:01:49-08 - - $
+d147 1
+a147 1
+      LOG << *ptr << " ... area()=" << ptr->area() << endl;
+@
+
+
+1.17
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.16 2022-01-14 23:00:50-08 - - $
+d160 1
+a160 2
+//TEST// valgrind --leak-check=full --show-reachable=yes \
+//TEST//       virtual-trace >virtual-trace.out 2>&1
+@
+
+
+1.16
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.15 2022-01-14 21:36:55-08 - - $
+d16 1
+a16 1
+#define LOG cout << __PRETTY_FUNCTION__ << "... "
+@
+
+
+1.15
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.14 2022-01-14 21:35:24-08 - - $
+d64 1
+a64 1
+              << demangle_typeid(*this) << ": id=" << id;
+d122 1
+a122 1
+   return this->object::print (out) << ", radius=" << radius;
+@
+
+
+1.14
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.13 2022-01-14 21:34:10-08 - - $
+d98 1
+@
+
+
+1.13
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.12 2022-01-14 20:48:42-08 - - $
+a158 1
+/*
+d160 2
+a161 3
+//TEST//       inheritance2 >inheritance2.out 2>&1
+//TEST// mkpspdf inheritance2.ps inheritance2.cpp inheritance2.out*
+*/
+@
+
+
+1.12
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.11 2021-10-19 10:22:35-07 - - $
+d16 1
+a16 1
+#define LOG cout << __PRETTY_FUNCTION__ << ": "
+d42 2
+a43 2
+      object (const object&) = delete;
+      object& operator= (const object&) = delete;
+d54 1
+a54 1
+object::object(): id(++next_id) {
+d63 2
+a64 2
+   return out << "[" << static_cast<const void *> (this) << "->"
+              << demangle_typeid(*this) << " id=" << id << "]: ";
+d91 1
+a91 1
+   return this->object::print (out) << "width=" << width;
+d121 1
+a121 1
+   return this->object::print (out) << "radius=" << radius;
+d144 1
+a144 1
+   LOG << "Before for loop ..." << endl;
+d150 1
+a150 1
+   LOG << "Before pop_back ..." << endl;
+@
+
+
+1.11
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.10 2021-10-19 10:21:12-07 - - $
+d162 1
+a162 1
+//TEST// mkpspdf inheritance2.ps inheritance2.cpp* inheritance2.out*
+@
+
+
+1.10
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.9 2021-10-19 10:08:17-07 - - $
+d137 1
+a137 1
+   LOG << "Before push_back." << endl;
+a141 1
+   LOG << "After push_back." << endl;
+d144 1
+a144 1
+   LOG << "Before for loop." << endl;
+a147 1
+   LOG << "After for loop." << endl;
+d150 1
+d153 1
+d155 1
+a155 2
+   cout << endl;
+   LOG << "return 0" << endl;
+@
+
+
+1.9
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.8 2021-10-19 10:06:14-07 - - $
+d137 1
+d142 1
+d145 1
+d149 1
+@
+
+
+1.8
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.7 2021-10-19 10:02:06-07 - - $
+d150 2
+@
+
+
+1.7
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.6 2021-10-19 10:01:32-07 - - $
+d138 1
+a139 1
+   vec.push_back (make_shared<square> ( 5));
+d148 1
+@
+
+
+1.6
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.5 2021-10-19 09:53:42-07 - - $
+d148 1
+@
+
+
+1.5
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.4 2021-10-19 09:52:55-07 - - $
+d76 1
+a76 1
+      explicit square (size_t width = 0);
+d106 1
+a106 1
+      explicit circle (size_t radius = 0);
+d137 1
+a137 1
+   vec.push_back (make_shared<circle> (  ));
+a138 1
+   vec.push_back (make_shared<square> (  ));
+d140 1
+a140 1
+   vec.push_back (make_shared<square> ( 8));
+@
+
+
+1.4
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.3 2021-10-19 09:52:19-07 - - $
+d51 1
+a51 2
+   obj.print (out);
+   return out;
+@
+
+
+1.3
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.2 2021-10-19 09:50:57-07 - - $
+d92 1
+a92 1
+   this->object::print (out) << "width=" << width;
+d122 1
+a122 1
+   this->object::print (out) << "radius=" << radius;
+@
+
+
+1.2
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-trace.cpp,v 1.1 2021-10-19 09:42:59-07 - - $
+d45 1
+a45 1
+      virtual void print (ostream&) const;
+d79 1
+a79 1
+      virtual void print (ostream&) const override;
+d91 1
+a91 1
+void square::print (ostream& out) const {
+d109 1
+a109 1
+      virtual void print (ostream&) const override;
+d121 1
+a121 1
+void circle::print (ostream& out) const {
+@
+
+
+1.1
+log
+@-
+@
+text
+@d1 1
+a1 1
+// $Id: virtual-fns.cpp,v 1.1 2021-10-19 09:41:43-07 - - $
+d63 3
+a65 3
+void object::print (ostream& out) const {
+   out << "[" << static_cast<const void *> (this) << "->"
+       << demangle_typeid(*this) << " id=" << id << "]: ";
+d92 1
+a92 2
+   this->object::print (out);
+   out << "width=" << width;
+d105 1
+a105 1
+      double diam;
+d107 1
+a107 1
+      explicit circle (size_t diam = 0);
+d110 1
+a110 1
+      virtual double area() const  override;
+d113 1
+a113 1
+circle::circle (size_t diam_): diam(diam_) {
+d122 1
+a122 2
+   this->object::print (out);
+   out << "diam=" << diam;
+d126 1
+a126 1
+   return M_PI * pow (diam, 2.0);
+d146 1
+a146 1
+      LOG << *ptr << " ... area() = " << ptr->area() << endl;
+@

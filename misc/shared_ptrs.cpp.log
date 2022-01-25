@@ -1,0 +1,10 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ mkc: starting shared_ptrs.cpp
+$Id: shared_ptrs.cpp,v 1.63 2022-01-14 20:43:06-08 - - $
+checksource shared_ptrs.cpp
+checksource: TOTAL COMPLAINTS: 0
+shared_ptrs.cpp: $Id: shared_ptrs.cpp,v 1.63 2022-01-14 20:43:06-08 - - $
+cpplint.py.perl shared_ptrs.cpp
+Done processing shared_ptrs.cpp
+g++ -Wall -Wextra -Wpedantic -Wshadow -fdiagnostics-color=never -std=gnu++2a -Wold-style-cast -pthread -g -O0 shared_ptrs.cpp -o shared_ptrs -lm
+rm -f shared_ptrs.o
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ mkc: finished shared_ptrs.cpp
