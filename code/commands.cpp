@@ -89,9 +89,10 @@ void fn_prompt (inode_state& state, const wordvec& words) {
    DEBUGF ('c', words);
 }
 
-void fn_pwd (inode_state& state, const wordvec& words) {
-   DEBUGF ('c', state);
-   DEBUGF ('c', words);
+void fn_pwd (inode_state& state, const wordvec& words) 
+{
+   (void)words;
+   cout << state.get_cwd();
 }
 
 void fn_rm (inode_state& state, const wordvec& words) {

@@ -38,6 +38,8 @@ class inode_state {
       inode_ptr cwd {nullptr};
       string prompt_ {"% "};
    public:
+      inode_ptr get_cwd();
+      void set_cwd();
       inode_state (const inode_state&) = delete; // copy ctor
       inode_state& operator= (const inode_state&) = delete; // op=
       inode_state();

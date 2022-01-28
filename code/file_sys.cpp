@@ -11,6 +11,15 @@ using namespace std;
 
 size_t inode::next_inode_nr {1};
 
+inode_ptr inode_state::get_cwd()
+{
+   return cwd;
+}
+
+void inode_state::set_cwd()
+{
+}
+
 ostream& operator<< (ostream& out, file_type type) {
    switch (type) {
       case file_type::PLAIN_TYPE: out << "PLAIN_TYPE"; break;
