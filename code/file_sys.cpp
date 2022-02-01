@@ -160,7 +160,7 @@ inode_ptr directory::mkdir(const string &dirname)
    DEBUGF('i', dirname);
 
    inode_ptr node = make_shared<inode>(file_type::DIRECTORY_TYPE);
-   node->get_dirents().insert(dirent_type(dirname, node));
+   node->get_dirents().insert(dirent_type(".", node));
 
    return node;
 }

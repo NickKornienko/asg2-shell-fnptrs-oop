@@ -122,9 +122,9 @@ void fn_mkdir(inode_state &state, const wordvec &words)
 
    dirents.insert(std::pair(words[1], state.get_cwd()->get_contents()->mkdir(words[1])));
 
-   dirents.insert(std::pair(".", state.get_cwd()->get_contents()->mkdir(words[1])));
-   dirents.insert(std::pair("..", state.get_cwd()->get_contents()->get_dirents().at(".")));
-
+   inode_ptr child = dirents.at(words[1]);
+   directory_entries &child_dirents = child->get_contents()->get_dirents();
+   child_dirents.insert(std::pair("..", cwd_));
 
    DEBUGF('c', state);
    DEBUGF('c', words);
@@ -140,22 +140,18 @@ void fn_pwd_recur(inode_ptr cwd_, size_t node_number)
 {
    base_file_ptr contents = cwd_->get_contents();
    directory_entries dirents = contents->get_dirents();
-   bool atRoot = false;
 
-   if (dirents.at("..") == cwd_)
-   {
-      cout << "\\";
-      atRoot = true;
-   }
+   if (dirents.at("..") != cwd_)
+      fn_pwd_recur(dirents.at(".."), cwd_->get_inode_nr());
 
    for (auto itr = dirents.begin(); itr != dirents.end(); ++itr)
    {
       if (itr->second->get_inode_nr() == node_number)
-         cout << itr->first << "\\";
+      {
+         cout << "/" << itr->first;
+         break;
+      }
    }
-
-   if (!atRoot)
-      fn_pwd_recur(dirents.at(".."), cwd_->get_inode_nr());
 
    return;
 }
@@ -169,7 +165,7 @@ void fn_pwd(inode_state &state, const wordvec &words)
 
    if (dirents.at("..") == cwd_)
    {
-      cout << "\\\n";
+      cout << "/\n";
       return;
    }
 
