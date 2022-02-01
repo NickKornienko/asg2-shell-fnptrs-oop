@@ -105,8 +105,17 @@ void base_file::remove(const string &)
    throw file_error("is a " + file_type());
 }
 
-inode_ptr base_file::mkdir(const string &)
+inode_ptr base_file::mkdir(const string &s)
 {
+   (void)s;
+   cout << "reached" << "\n";
+   // inode node = inode(file_type());
+   // node.get_contents()->dirends();
+
+   // inode_ptr node = make_shared<inode>(file_type::DIRECTORY_TYPE);
+   // directory_entries &dirents = node->get_dirents();
+   // dirents.insert(dirent_type(&, root));
+
    throw file_error("is a " + file_type());
 }
 

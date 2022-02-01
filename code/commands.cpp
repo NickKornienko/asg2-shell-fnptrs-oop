@@ -96,6 +96,7 @@ void fn_make(inode_state &state, const wordvec &words)
 
 void fn_mkdir(inode_state &state, const wordvec &words)
 {
+   state.get_cwd()->get_contents()->mkdir(words[1]);
    DEBUGF('c', state);
    DEBUGF('c', words);
 }
@@ -108,7 +109,6 @@ void fn_prompt(inode_state &state, const wordvec &words)
 
 void fn_pwd(inode_state &state, const wordvec &words)
 {
-   // cout << state << "\n";
    (void)words;
    inode_ptr cwd_ = state.get_cwd();
    base_file_ptr contents = cwd_->get_contents();
