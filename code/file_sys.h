@@ -46,6 +46,7 @@ private:
    string prompt_{"% "};
 
 public:
+   void change_pwd();
    inode_ptr get_cwd();
    inode_state(const inode_state &) = delete;            // copy ctor
    inode_state &operator=(const inode_state &) = delete; // op=
