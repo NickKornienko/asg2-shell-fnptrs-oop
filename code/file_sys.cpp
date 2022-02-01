@@ -16,6 +16,11 @@ inode_ptr inode_state::get_cwd()
    return cwd;
 }
 
+void inode_state::set_cwd(inode_ptr node)
+{
+   cwd = node;
+}
+
 base_file_ptr inode::get_contents()
 {
    return contents;
@@ -105,17 +110,8 @@ void base_file::remove(const string &)
    throw file_error("is a " + file_type());
 }
 
-inode_ptr base_file::mkdir(const string &s)
+inode_ptr base_file::mkdir(const string &)
 {
-   (void)s;
-   cout << "reached" << "\n";
-   // inode node = inode(file_type());
-   // node.get_contents()->dirends();
-
-   // inode_ptr node = make_shared<inode>(file_type::DIRECTORY_TYPE);
-   // directory_entries &dirents = node->get_dirents();
-   // dirents.insert(dirent_type(&, root));
-
    throw file_error("is a " + file_type());
 }
 
@@ -162,7 +158,11 @@ void directory::remove(const string &filename)
 inode_ptr directory::mkdir(const string &dirname)
 {
    DEBUGF('i', dirname);
-   return nullptr;
+
+   inode_ptr node = make_shared<inode>(file_type::DIRECTORY_TYPE);
+   node->get_dirents().insert(dirent_type(dirname, node));
+
+   return node;
 }
 
 inode_ptr directory::mkfile(const string &filename)
