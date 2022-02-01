@@ -107,6 +107,30 @@ void fn_prompt(inode_state &state, const wordvec &words)
    DEBUGF('c', words);
 }
 
+void fn_pwd_recur(inode_ptr cwd_, size_t node_number)
+{
+   base_file_ptr contents = cwd_->get_contents();
+   directory_entries dirents = contents->get_dirents();
+   bool atRoot = false;
+
+   if(dirents.at("..") == cwd_)
+   {
+      cout << "\\";
+      atRoot = true;
+   }
+
+   for (auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+   {
+       if(itr->second->get_inode_nr() == node_number)
+           cout << itr->first << "\\";
+   }
+
+   if(!atRoot)
+      fn_pwd_recur(dirents.at(".."), cwd_->get_inode_nr());
+
+   return;
+}
+
 void fn_pwd(inode_state &state, const wordvec &words)
 {
    (void)words;
@@ -114,13 +138,14 @@ void fn_pwd(inode_state &state, const wordvec &words)
    base_file_ptr contents = cwd_->get_contents();
    directory_entries dirents = contents->get_dirents();
 
-   for (auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+   if(dirents.at("..") == cwd_)
    {
-      cout << '\t' << itr->first << '\t' << itr->second
-           << '\n';
+      cout << "\\\n";
+      return;
    }
 
-   // cout << contents->size() << "\n";
+   fn_pwd_recur(dirents.at(".."), cwd_->get_inode_nr());
+   cout << "\n";
 
    DEBUGF('c', state);
    DEBUGF('c', words);
