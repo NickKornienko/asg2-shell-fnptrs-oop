@@ -48,6 +48,7 @@ private:
 public:
    void change_pwd();
    inode_ptr get_cwd();
+   inode_ptr get_root();
    void set_cwd(inode_ptr);
    inode_state(const inode_state &) = delete;            // copy ctor
    inode_state &operator=(const inode_state &) = delete; // op=
@@ -80,6 +81,7 @@ private:
    base_file_ptr contents;
 
 public:
+   bool is_directory();
    base_file_ptr get_contents();
    inode() = delete;
    inode(const inode &) = delete;

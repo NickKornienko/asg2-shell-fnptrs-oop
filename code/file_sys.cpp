@@ -16,6 +16,11 @@ inode_ptr inode_state::get_cwd()
    return cwd;
 }
 
+inode_ptr inode_state::get_root()
+{
+   return root;
+}
+
 void inode_state::set_cwd(inode_ptr node)
 {
    cwd = node;
@@ -24,6 +29,11 @@ void inode_state::set_cwd(inode_ptr node)
 base_file_ptr inode::get_contents()
 {
    return contents;
+}
+
+bool inode::is_directory()
+{
+   return this->get_contents()->file_type() == "directory";
 }
 
 ostream &operator<<(ostream &out, file_type type)
