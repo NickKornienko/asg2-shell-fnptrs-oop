@@ -1,3 +1,9 @@
-partnercheck: ./PARTNER: No such file or directory
-This is not an error if this student is working alone.
-This *is* an error if working with a partner.
+partnercheck: partner = "nkornien"
+partnercheck: ./PARTNER: format OK:
+username = "nkornien"
+passwd   = "*"
+uid      = "264228"
+gid      = "100"
+gecos    = "Nick Kornienko"
+home     = "/afs/cats.ucsc.edu/users/c/nkornien"
+shell    = "/bin/bash"

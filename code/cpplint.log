@@ -1,4 +1,7 @@
+commands.cpp:123:  Lines should be <= 72 characters long  [whitespace/line_length] [2]
+commands.cpp:126:  Lines should be <= 72 characters long  [whitespace/line_length] [2]
 Done processing commands.cpp
+Total errors found: 2
 Done processing debug.cpp
 Done processing file_sys.cpp
 Done processing main.cpp

@@ -135,6 +135,11 @@ directory_entries &base_file::get_dirents()
    throw file_error("is a " + file_type());
 }
 
+void inode_state::set_prompt_(string p)
+{
+   prompt_ = p;
+}
+
 size_t plain_file::size() const
 {
    size_t size{0};
@@ -156,6 +161,7 @@ void plain_file::writefile(const wordvec &words)
 size_t directory::size() const
 {
    size_t size{0};
+   size = this->dirents.size();
    DEBUGF('i', "size = " << size);
    return size;
 }

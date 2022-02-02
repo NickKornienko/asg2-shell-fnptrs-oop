@@ -17,7 +17,13 @@ const command_hash cmd_hash{
     {"pwd", fn_pwd},
     {"rm", fn_rm},
     {"rmr", fn_rmr},
+    {"#", fn_comment},
 };
+
+void fn_comment(inode_state&, const wordvec&)
+{
+
+}
 
 command_fn find_command_fn(const string &cmd)
 {
@@ -140,19 +146,81 @@ void fn_exit(inode_state &state, const wordvec &words)
 
 void fn_ls(inode_state &state, const wordvec &words)
 {
+   inode_ptr old_cwd = state.get_cwd();
+
+   if(words.size() > 1)
+   {
+      wordvec new_words;
+      new_words.push_back("");
+      
+      if(words[1] == "/")
+      {
+        new_words.push_back("");
+        fn_cd(state, new_words);
+      }
+      else
+      {
+        new_words.push_back(words[1]);
+        try
+        {
+           fn_cd(state, new_words);
+           cout << words[1] << "\n";
+        }
+        catch (file_error &)
+        {
+           state.set_cwd(old_cwd);
+           throw file_error(words[1] + ": No such file or directory");
+           return;
+        } 
+      }
+   }
+
+   wordvec new_words;
+   new_words.push_back("ls");
+   fn_pwd(state, new_words);
+   
+   inode_ptr cwd_ = state.get_cwd();   
+   base_file_ptr contents = cwd_->get_contents();
+   directory_entries dirents = contents->get_dirents();
+   
+   for(auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+   {
+      size_t size = itr->second->get_contents()->size();
+      size_t i_num = itr->second->get_inode_nr();
+      printf("%6ld  %6ld  ", i_num, size);
+      cout << itr->first << "\n";
+   } 
+
+   state.set_cwd(old_cwd);
+
    DEBUGF('c', state);
    DEBUGF('c', words);
-   DEBUGS(
-       'l',
-       const auto &dirents = state.get_root()->get_dirents();
-       for (const auto &entry
-            : dirents) {
-          cerr << "\"" << entry.first << "\"->" << entry.second << endl;
-       });
 }
 
 void fn_lsr(inode_state &state, const wordvec &words)
 {
+   inode_ptr cwd_ = state.get_cwd();
+   base_file_ptr contents = cwd_->get_contents();
+   directory_entries dirents = contents->get_dirents();
+
+   wordvec new_words;
+   new_words.push_back("");
+   fn_ls(state, new_words);
+   inode_ptr old_cwd = cwd_;
+   
+   for(auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+   {
+       if(!itr->second->is_directory() || itr->first == "." || itr->first == "..")
+          continue;
+ 
+       new_words.push_back(itr->first);
+       fn_cd(state, new_words);
+       fn_lsr(state, new_words);
+       new_words.pop_back();
+   }
+
+   state.set_cwd(old_cwd); 
+
    DEBUGF('c', state);
    DEBUGF('c', words);
 }
@@ -222,6 +290,13 @@ void fn_mkdir(inode_state &state, const wordvec &words)
 
 void fn_prompt(inode_state &state, const wordvec &words)
 {
+   string p = "";
+
+   for(size_t i = 1; i < words.size(); i++)
+      p += words[i] + " ";
+
+   state.set_prompt_(p);
+
    DEBUGF('c', state);
    DEBUGF('c', words);
 }
@@ -248,20 +323,26 @@ void fn_pwd_recur(inode_ptr cwd_, size_t node_number)
 
 void fn_pwd(inode_state &state, const wordvec &words)
 {
-   (void)words;
    inode_ptr cwd_ = state.get_cwd();
    base_file_ptr contents = cwd_->get_contents();
    directory_entries dirents = contents->get_dirents();
 
    if (dirents.at("..") == cwd_)
    {
-      cout << "/\n";
+      if(words[0] == "ls")
+         cout << "/:\n";
+      else
+         cout << "/\n";
+
       return;
    }
 
    fn_pwd_recur(dirents.at(".."), cwd_->get_inode_nr());
-   cout << "\n";
-
+   if(words[0] == "ls")
+      cout << ":\n";
+   else
+      cout << "\n";
+   
    DEBUGF('c', state);
    DEBUGF('c', words);
 }

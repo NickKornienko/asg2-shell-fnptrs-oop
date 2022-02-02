@@ -1,4 +1,4 @@
-./yshell build Jan 24 2022 18:21:06
+./yshell build Feb  1 2022 10:15:42
 % mkdir foo
 % mkdir foo/bar
 % mkdir foo/bar/baz
@@ -11,6 +11,7 @@
 % make file8 nine ten eleven
 % cat file8
 % cd /
+not found
 % lsr /
 % lsr foo foo/bar
 % rmr foo

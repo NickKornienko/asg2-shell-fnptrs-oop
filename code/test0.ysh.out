@@ -1,5 +1,6 @@
-./yshell build Jan 24 2022 18:21:06
+./yshell build Feb  1 2022 10:15:42
 % pwd
+/
 % echo Hello World
 Hello World
 % echo This is a very simple test.

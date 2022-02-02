@@ -46,6 +46,7 @@ private:
    string prompt_{"% "};
 
 public:
+   void set_prompt_(string p);
    void change_pwd();
    inode_ptr get_cwd();
    inode_ptr get_root();
