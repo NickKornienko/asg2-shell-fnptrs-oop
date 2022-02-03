@@ -1,4 +1,4 @@
-./yshell build Feb  1 2022 10:15:42
+./yshell build Feb  1 2022 23:47:29
 % Bad command.  Was a message printed, and the program continued?
 % make file this is the first file
 % make second file
@@ -7,6 +7,9 @@
 % cat second
 % cat file second third
 % ls /
+/:
+     1       2  .
+     1       2  ..
 % # Checking on making files and catting them.
 % # Does ls with files work?
 % # $Id: test2.ysh,v 1.1 2013-01-02 19:11:43-08 - - $
