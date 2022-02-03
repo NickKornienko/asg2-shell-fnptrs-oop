@@ -17,13 +17,7 @@ const command_hash cmd_hash{
     {"pwd", fn_pwd},
     {"rm", fn_rm},
     {"rmr", fn_rmr},
-    {"#", fn_comment},
 };
-
-void fn_comment(inode_state&, const wordvec&)
-{
-
-}
 
 command_fn find_command_fn(const string &cmd)
 {
@@ -148,48 +142,48 @@ void fn_ls(inode_state &state, const wordvec &words)
 {
    inode_ptr old_cwd = state.get_cwd();
 
-   if(words.size() > 1)
+   if (words.size() > 1)
    {
       wordvec new_words;
       new_words.push_back("");
-      
-      if(words[1] == "/")
+
+      if (words[1] == "/")
       {
-        new_words.push_back("");
-        fn_cd(state, new_words);
+         new_words.push_back("");
+         fn_cd(state, new_words);
       }
       else
       {
-        new_words.push_back(words[1]);
-        try
-        {
-           fn_cd(state, new_words);
-           cout << words[1] << "\n";
-        }
-        catch (file_error &)
-        {
-           state.set_cwd(old_cwd);
-           throw file_error(words[1] + ": No such file or directory");
-           return;
-        } 
+         new_words.push_back(words[1]);
+         try
+         {
+            fn_cd(state, new_words);
+            cout << words[1] << "\n";
+         }
+         catch (file_error &)
+         {
+            state.set_cwd(old_cwd);
+            throw file_error(words[1] + ": No such file or directory");
+            return;
+         }
       }
    }
 
    wordvec new_words;
    new_words.push_back("ls");
    fn_pwd(state, new_words);
-   
-   inode_ptr cwd_ = state.get_cwd();   
+
+   inode_ptr cwd_ = state.get_cwd();
    base_file_ptr contents = cwd_->get_contents();
    directory_entries dirents = contents->get_dirents();
-   
-   for(auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+
+   for (auto itr = dirents.begin(); itr != dirents.end(); ++itr)
    {
       size_t size = itr->second->get_contents()->size();
       size_t i_num = itr->second->get_inode_nr();
       printf("%6ld  %6ld  ", i_num, size);
       cout << itr->first << "\n";
-   } 
+   }
 
    state.set_cwd(old_cwd);
 
@@ -207,19 +201,21 @@ void fn_lsr(inode_state &state, const wordvec &words)
    new_words.push_back("");
    fn_ls(state, new_words);
    inode_ptr old_cwd = cwd_;
-   
-   for(auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+
+   for (auto itr = dirents.begin(); itr != dirents.end(); ++itr)
    {
-       if(!itr->second->is_directory() || itr->first == "." || itr->first == "..")
-          continue;
- 
-       new_words.push_back(itr->first);
-       fn_cd(state, new_words);
-       fn_lsr(state, new_words);
-       new_words.pop_back();
+      if (!itr->second->is_directory() ||
+          itr->first == "." ||
+          itr->first == "..")
+         continue;
+
+      new_words.push_back(itr->first);
+      fn_cd(state, new_words);
+      fn_lsr(state, new_words);
+      new_words.pop_back();
    }
 
-   state.set_cwd(old_cwd); 
+   state.set_cwd(old_cwd);
 
    DEBUGF('c', state);
    DEBUGF('c', words);
@@ -239,15 +235,16 @@ void fn_mkdir_single(inode_state &state, const wordvec &words)
 
    if (dirents.count(words[1]))
    {
-      throw file_error("mkdir: cannot create directory '" + words[1] + "': File exists");
-      // cout << "mkdir: cannot create directory '" << words[i] << "': File exists\n";
-      // continue;
+      throw file_error("mkdir: cannot create directory '" +
+                       words[1] + "': File exists");
    }
-
-   dirents.insert(std::pair(words[1], state.get_cwd()->get_contents()->mkdir(words[1])));
+   inode_ptr node = state.get_cwd()->get_contents()->mkdir(words[1]);
+   dirents.insert(std::pair(words[1], node));
+                            
 
    inode_ptr child = dirents.at(words[1]);
-   directory_entries &child_dirents = child->get_contents()->get_dirents();
+   directory_entries &child_dirents =
+       child->get_contents()->get_dirents();
    child_dirents.insert(std::pair("..", cwd_));
 
    DEBUGF('c', state);
@@ -276,7 +273,9 @@ void fn_mkdir(inode_state &state, const wordvec &words)
          catch (file_error &)
          {
             state.set_cwd(old_cwd);
-            throw file_error("cannot create directory " + words[i] + ": No such file or directory");
+            throw file_error("cannot create directory " +
+                             words[i] +
+                             ": No such file or directory");
             return;
          }
       }
@@ -292,7 +291,7 @@ void fn_prompt(inode_state &state, const wordvec &words)
 {
    string p = "";
 
-   for(size_t i = 1; i < words.size(); i++)
+   for (size_t i = 1; i < words.size(); i++)
       p += words[i] + " ";
 
    state.set_prompt_(p);
@@ -329,7 +328,7 @@ void fn_pwd(inode_state &state, const wordvec &words)
 
    if (dirents.at("..") == cwd_)
    {
-      if(words[0] == "ls")
+      if (words[0] == "ls")
          cout << "/:\n";
       else
          cout << "/\n";
@@ -338,11 +337,11 @@ void fn_pwd(inode_state &state, const wordvec &words)
    }
 
    fn_pwd_recur(dirents.at(".."), cwd_->get_inode_nr());
-   if(words[0] == "ls")
+   if (words[0] == "ls")
       cout << ":\n";
    else
       cout << "\n";
-   
+
    DEBUGF('c', state);
    DEBUGF('c', words);
 }

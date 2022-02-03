@@ -1,3 +1,2 @@
-yshell: #: no such command
-yshell: #: no such command
-yshell: #: no such command
+yshell: cannot create directory this/mkdir/should/error/out: No such file or directory
+yshell: /: No such file or directory
