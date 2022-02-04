@@ -142,9 +142,8 @@ void inode_state::set_prompt_(string p)
 
 size_t plain_file::size() const
 {
-   size_t size{0};
-   DEBUGF('i', "size = " << size);
-   return size;
+   DEBUGF('i', "size = " << file_size);
+   return file_size;
 }
 
 const wordvec &plain_file::readfile() const
@@ -155,6 +154,10 @@ const wordvec &plain_file::readfile() const
 
 void plain_file::writefile(const wordvec &words)
 {
+   file_size = words.size();
+   for (size_t i = 0; i < words.size(); i++)
+      file_size += words[i].length();
+
    this->data = words;
 }
 

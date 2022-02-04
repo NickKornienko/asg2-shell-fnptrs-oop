@@ -59,6 +59,46 @@ vector<string> tokenize_path(string path)
 
 void fn_cat(inode_state &state, const wordvec &words)
 {
+   if (words.size() < 2)
+      throw file_error("cat: missing operand");
+
+   inode_ptr old_cwd = state.get_cwd();
+
+   vector<string> tokens = tokenize_path(words[1]);
+
+   for (size_t j = 0; j < tokens.size() - 1; j++)
+   {
+      wordvec word_vec;
+      word_vec.push_back("");
+      word_vec.push_back(tokens[j]);
+
+      try
+      {
+         fn_cd(state, word_vec);
+      }
+      catch (file_error &)
+      {
+         state.set_cwd(old_cwd);
+         throw file_error("cannot create directory " +
+                          words[1] +
+                          ": No such file or directory");
+         return;
+      }
+   }
+ 
+   string final_token = tokens[tokens.size() - 1];
+   directory_entries dirents = 
+        state.get_cwd()->get_contents()->get_dirents(); 
+
+   inode_ptr file = dirents.at(final_token);
+   wordvec text = file->get_contents()->readfile();
+
+   for(size_t i = 0; i < text.size(); i++)
+      cout << text.at(i) << ' ';
+   cout << "\n";   
+
+   state.set_cwd(old_cwd); 
+
    DEBUGF('c', state);
    DEBUGF('c', words);
 }
@@ -174,7 +214,6 @@ void fn_ls(inode_state &state, const wordvec &words)
          try
          {
             fn_cd(state, new_words);
-            cout << words[1] << "\n";
          }
          catch (file_error &)
          {
@@ -263,28 +302,39 @@ void fn_lsr(inode_state &state, const wordvec &words)
    DEBUGF('c', words);
 }
 
-void fn_make_single(inode_state &state, const wordvec &words)
+inode_ptr fn_make_single(inode_state &state, const wordvec &words)
 {
    inode_ptr cwd_ = state.get_cwd();
    base_file_ptr contents = cwd_->get_contents();
    directory_entries &dirents = contents->get_dirents();
+   inode_ptr node;
+
+   if(dirents.count(words[1]) && dirents.at(words[1])->is_directory())
+   {
+      throw file_error("mkdir: cannot create file '" +
+                       words[1] +
+                       "': File exists");
+   } 
 
    if (!dirents.count(words[1]))
    {
-      inode_ptr node =
-          state.get_cwd()->get_contents()->mkfile(words[1]);
+      node = state.get_cwd()->get_contents()->mkfile(words[1]);
 
       dirents.insert(std::pair(words[1], node));
    }
-   
+   else
+      node = dirents.at(words[1]);
+ 
    DEBUGF('c', state);
    DEBUGF('c', words);
+  
+   return node;
 }
 
 void fn_make(inode_state &state, const wordvec &words)
 {
    if (words.size() < 2)
-      throw file_error("mkdir: missing operand");
+      throw file_error("make: missing operand");
 
    inode_ptr cwd_ = state.get_cwd();
    inode_ptr old_cwd = state.get_cwd();
@@ -315,16 +365,10 @@ void fn_make(inode_state &state, const wordvec &words)
    final_token.push_back("");
    final_token.push_back(tokens[tokens.size() - 1]);
 
-   fn_make_single(state, final_token);
+   inode_ptr file = fn_make_single(state, final_token);
    wordvec text(words.begin() + 2, words.end());
-   state.get_cwd()->get_contents()->writefile(text);
+   file->get_contents()->writefile(text);
    state.set_cwd(old_cwd);
-
-   size_t size = words.size() - 2;
-   for (size_t i = 2; i < words.size(); i++)
-   {
-      size += words[i].length();
-   }
 
    DEBUGF('c', state);
    DEBUGF('c', words);

@@ -143,7 +143,7 @@ private:
       static const string result = "plain file";
       return result;
    }
-
+   size_t file_size = 0;
 public:
    virtual size_t size() const override;
    virtual const wordvec &readfile() const override;
