@@ -528,7 +528,7 @@ void fn_rm_sngl(inode_state &state, const wordvec &words, inode_ptr old)
                        "': No such file or directory");
    }
    inode_ptr child = dirents.at(words[1]);
-   if (cwd_->is_directory() && !child->is_directory())
+   if (cwd_->is_directory() && child->is_directory())
    {
       directory_entries child_dirents =
           child->get_contents()->get_dirents();
