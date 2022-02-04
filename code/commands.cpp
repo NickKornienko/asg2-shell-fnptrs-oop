@@ -119,7 +119,6 @@ void fn_cd(inode_state &state, const wordvec &words)
       {
          state.set_cwd(old_cwd);
          throw file_error(words[1] + ": No such file or directory");
-         return;
       }
    }
 }
@@ -182,19 +181,6 @@ void fn_ls(inode_state &state, const wordvec &words)
             state.set_cwd(old_cwd);
             throw file_error(words[1] + ": No such file or directory");
          }
-
-         new_words.push_back(words[1]);
-         try
-         {
-            fn_cd(state, new_words);
-            cout << words[1] << "\n";
-         }
-         catch (file_error &)
-         {
-            state.set_cwd(old_cwd);
-            throw file_error(words[1] + ": No such file or directory");
-            return;
-         }
       }
    }
 
@@ -210,8 +196,12 @@ void fn_ls(inode_state &state, const wordvec &words)
    {
       size_t size = itr->second->get_contents()->size();
       size_t i_num = itr->second->get_inode_nr();
+      string dir_string = "";
+      if(itr->second->is_directory())
+         dir_string += "/";
+
       printf("%6ld  %6ld  ", i_num, size);
-      cout << itr->first << "\n";
+      cout << itr->first << dir_string << "\n";
    }
 
    state.set_cwd(old_cwd);
@@ -408,26 +398,31 @@ void fn_pwd(inode_state &state, const wordvec &words)
    DEBUGF('c', words);
 }
 
-void fn_rm_single(inode_state &state, const wordvec &words)
+void fn_rm_sngl(inode_state &state, const wordvec &words, inode_ptr old)
 {
    inode_ptr cwd_ = state.get_cwd();
    base_file_ptr contents = cwd_->get_contents();
    directory_entries &dirents = contents->get_dirents();
 
    if (!dirents.count(words[1]))
+   {
+      state.set_cwd(old); 
       throw file_error("rm: cannot remove '" +
                        words[1] +
                        "': No such file or directory");
-
+   }
    if (cwd_->is_directory())
    {
       inode_ptr child = dirents.at(words[1]);
       directory_entries child_dirents =
           child->get_contents()->get_dirents();
       if (child_dirents.size() > 2)
+      {
+         state.set_cwd(old);
          throw file_error("rm: cannot remove '" +
                           words[1] +
                           "': Is a directory");
+      }
    }
 
    dirents.erase(words[1]);
@@ -471,16 +466,19 @@ void fn_rm(inode_state &state, const wordvec &words)
       wordvec final_token;
       final_token.push_back("");
       final_token.push_back(tokens[tokens.size() - 1]);
-      fn_rm_single(state, final_token);
+      fn_rm_sngl(state, final_token, old_cwd);
       state.set_cwd(old_cwd);
    }
 }
 
 void fn_rmr(inode_state &state, const wordvec &words)
 {
+   if (words.size() < 2)
+      throw file_error("rmr: missing operand");
+
    inode_ptr old_cwd = state.get_cwd();
 
-   if (words[0] == "rmr" && words.size() > 1)
+   if (words[0] == "rmr")
    {
       wordvec cd_words;
       cd_words.push_back("");
@@ -515,9 +513,7 @@ void fn_rmr(inode_state &state, const wordvec &words)
          continue;
       }
       else if (itr->first == "." || itr->first == "..")
-      {
          continue;
-      }
 
       new_words.push_back(itr->first);
       fn_cd(state, new_words);
