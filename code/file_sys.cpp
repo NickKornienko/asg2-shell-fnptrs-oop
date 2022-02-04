@@ -155,7 +155,7 @@ const wordvec &plain_file::readfile() const
 
 void plain_file::writefile(const wordvec &words)
 {
-   DEBUGF('i', words);
+   this->data = words;
 }
 
 size_t directory::size() const
@@ -181,10 +181,11 @@ inode_ptr directory::mkdir(const string &dirname)
    return node;
 }
 
-inode_ptr directory::mkfile(const string &filename)
+inode_ptr directory::mkfile(const string &)
 {
-   DEBUGF('i', filename);
-   return nullptr;
+   inode_ptr node = make_shared<inode>(file_type::PLAIN_TYPE);
+
+   return node;
 }
 
 directory_entries &directory::get_dirents()
