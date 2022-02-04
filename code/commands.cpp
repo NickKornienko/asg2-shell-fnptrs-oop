@@ -78,26 +78,24 @@ void fn_cat(inode_state &state, const wordvec &words)
       }
       catch (file_error &)
       {
-         state.set_cwd(old_cwd);
          throw file_error("cannot create directory " +
                           words[1] +
                           ": No such file or directory");
-         return;
       }
    }
- 
+
    string final_token = tokens[tokens.size() - 1];
-   directory_entries dirents = 
-        state.get_cwd()->get_contents()->get_dirents(); 
+   directory_entries dirents =
+       state.get_cwd()->get_contents()->get_dirents();
 
    inode_ptr file = dirents.at(final_token);
    wordvec text = file->get_contents()->readfile();
 
-   for(size_t i = 0; i < text.size(); i++)
+   for (size_t i = 0; i < text.size(); i++)
       cout << text.at(i) << ' ';
-   cout << "\n";   
+   cout << "\n";
 
-   state.set_cwd(old_cwd); 
+   state.set_cwd(old_cwd);
 
    DEBUGF('c', state);
    DEBUGF('c', words);
@@ -309,12 +307,12 @@ inode_ptr fn_make_single(inode_state &state, const wordvec &words)
    directory_entries &dirents = contents->get_dirents();
    inode_ptr node;
 
-   if(dirents.count(words[1]) && dirents.at(words[1])->is_directory())
+   if (dirents.count(words[1]) && dirents.at(words[1])->is_directory())
    {
-      throw file_error("mkdir: cannot create file '" +
+      throw file_error("make: cannot create file '" +
                        words[1] +
                        "': File exists");
-   } 
+   }
 
    if (!dirents.count(words[1]))
    {
@@ -324,10 +322,10 @@ inode_ptr fn_make_single(inode_state &state, const wordvec &words)
    }
    else
       node = dirents.at(words[1]);
- 
+
    DEBUGF('c', state);
    DEBUGF('c', words);
-  
+
    return node;
 }
 
@@ -336,7 +334,6 @@ void fn_make(inode_state &state, const wordvec &words)
    if (words.size() < 2)
       throw file_error("make: missing operand");
 
-   inode_ptr cwd_ = state.get_cwd();
    inode_ptr old_cwd = state.get_cwd();
 
    vector<string> tokens = tokenize_path(words[1]);
@@ -357,15 +354,23 @@ void fn_make(inode_state &state, const wordvec &words)
          throw file_error("cannot create directory " +
                           words[1] +
                           ": No such file or directory");
-         return;
       }
    }
 
    wordvec final_token;
    final_token.push_back("");
    final_token.push_back(tokens[tokens.size() - 1]);
+   inode_ptr file;
+   try
+   {
+      file = fn_make_single(state, final_token);
+   }
+   catch (file_error &err)
+   {
+      state.set_cwd(old_cwd);
+      throw file_error(err);
+   }
 
-   inode_ptr file = fn_make_single(state, final_token);
    wordvec text(words.begin() + 2, words.end());
    file->get_contents()->writefile(text);
    state.set_cwd(old_cwd);
@@ -382,6 +387,7 @@ void fn_mkdir_single(inode_state &state, const wordvec &words)
 
    if (dirents.count(words[1]))
    {
+      state.set_cwd(cwd_);
       throw file_error("mkdir: cannot create directory '" +
                        words[1] +
                        "': File exists");
@@ -391,9 +397,6 @@ void fn_mkdir_single(inode_state &state, const wordvec &words)
        state.get_cwd()->get_contents()->mkdir(words[1]);
 
    dirents.insert(std::pair(words[1], node));
-
-   // node = state.get_cwd()->get_contents()->mkdir(words[1]);
-   // dirents.insert(std::pair(words[1], node));
 
    inode_ptr child = dirents.at(words[1]);
    directory_entries &child_dirents =
@@ -432,14 +435,22 @@ void fn_mkdir(inode_state &state, const wordvec &words)
             throw file_error("cannot create directory " +
                              words[i] +
                              ": No such file or directory");
-            return;
          }
       }
 
       wordvec final_token;
       final_token.push_back("");
       final_token.push_back(tokens[tokens.size() - 1]);
-      fn_mkdir_single(state, final_token);
+
+      try
+      {
+         fn_mkdir_single(state, final_token);
+      }
+      catch (file_error &err)
+      {
+         state.set_cwd(old_cwd);
+         throw file_error(err);
+      }
       state.set_cwd(old_cwd);
    }
 }
@@ -516,9 +527,9 @@ void fn_rm_sngl(inode_state &state, const wordvec &words, inode_ptr old)
                        words[1] +
                        "': No such file or directory");
    }
-   if (cwd_->is_directory())
+   inode_ptr child = dirents.at(words[1]);
+   if (cwd_->is_directory() && !child->is_directory())
    {
-      inode_ptr child = dirents.at(words[1]);
       directory_entries child_dirents =
           child->get_contents()->get_dirents();
       if (child_dirents.size() > 2)
@@ -564,7 +575,6 @@ void fn_rm(inode_state &state, const wordvec &words)
             throw file_error("cannot remove " +
                              words[i] +
                              ": No such file or directory");
-            return;
          }
       }
 
