@@ -59,8 +59,8 @@ vector<string> tokenize_path(string path)
 
 void fn_cat(inode_state &state, const wordvec &words)
 {
-   if (words.size() < 2)
-      throw file_error("cat: missing operand");
+   if (words.size() != 2)
+      throw file_error("cat: missing or extra operand");
 
    inode_ptr old_cwd = state.get_cwd();
 

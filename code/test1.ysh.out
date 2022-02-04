@@ -1,12 +1,12 @@
-./yshell build Feb  1 2022 23:47:29
+./yshell build Feb  3 2022 19:55:29
 % prompt this is my prompt:
 this is my prompt: ls /
 /:
-     1       2  .
-     1       2  ..
+     1       2  ./
+     1       2  ../
 this is my prompt: ls
 /:
-     1       2  .
-     1       2  ..
+     1       2  ./
+     1       2  ../
 this is my prompt: exit 5
-yshell: exit(0)
+yshell: exit(5)
