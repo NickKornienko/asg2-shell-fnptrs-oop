@@ -1,6 +1,1 @@
-checksource commands.cpp
-checksource: TOTAL COMPLAINTS: 0
-cpplint.py.perl commands.cpp
-Done processing commands.cpp
-g++ -std=gnu++2a -g -O0 -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast -fdiagnostics-color=never -c commands.cpp
-g++ -std=gnu++2a -g -O0 -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast -fdiagnostics-color=never -o yshell commands.o debug.o file_sys.o util.o main.o
+gmake: Nothing to be done for 'all'.

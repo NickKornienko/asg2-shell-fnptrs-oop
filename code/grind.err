@@ -1,28 +1,35 @@
-==31405== Memcheck, a memory error detector
-==31405== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==31405== Using Valgrind-3.17.0 and LibVEX; rerun with -h for copyright info
-==31405== Command: ./yshell
-==31405== 
-==31405== 
-==31405== Process terminating with default action of signal 2 (SIGINT)
-==31405==    at 0x4019675: open (syscall-template.S:81)
-==31405==    by 0x4010885: _dl_sysdep_read_whole_file (dl-misc.c:50)
-==31405==    by 0x4016D9C: _dl_load_cache_lookup (dl-cache.c:199)
-==31405==    by 0x4008907: _dl_map_object (dl-load.c:2295)
-==31405==    by 0x400CC61: openaux (dl-deps.c:63)
-==31405==    by 0x400F7D3: _dl_catch_error (dl-error.c:177)
-==31405==    by 0x400D46C: _dl_map_object_deps (dl-deps.c:256)
-==31405==    by 0x4003692: dl_main (rtld.c:1714)
-==31405==    by 0x401800D: _dl_sysdep_start (dl-sysdep.c:244)
-==31405==    by 0x4001BD0: _dl_start_final (rtld.c:400)
-==31405==    by 0x4001BD0: _dl_start (rtld.c:512)
-==31405==    by 0x4001147: ??? (in /usr/lib64/ld-2.17.so)
-==31405== 
-==31405== HEAP SUMMARY:
-==31405==     in use at exit: 0 bytes in 0 blocks
-==31405==   total heap usage: 0 allocs, 0 frees, 0 bytes allocated
-==31405== 
-==31405== All heap blocks were freed -- no leaks are possible
-==31405== 
-==31405== For lists of detected and suppressed errors, rerun with: -s
-==31405== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==7929== Memcheck, a memory error detector
+==7929== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==7929== Using Valgrind-3.17.0 and LibVEX; rerun with -h for copyright info
+==7929== Command: ./yshell
+==7929== 
+yshell: Bad: no such command
+yshell: cat: missing or extra operand
+==7929== 
+==7929== HEAP SUMMARY:
+==7929==     in use at exit: 1,262 bytes in 33 blocks
+==7929==   total heap usage: 281 allocs, 248 frees, 9,842 bytes allocated
+==7929== 
+==7929== 1,262 (40 direct, 1,222 indirect) bytes in 1 blocks are definitely lost in loss record 12 of 12
+==7929==    at 0x4C2B788: operator new(unsigned long) (vg_replace_malloc.c:417)
+==7929==    by 0x4175EF: __gnu_cxx::new_allocator<std::_Sp_counted_ptr_inplace<inode, std::allocator<inode>, (__gnu_cxx::_Lock_policy)2> >::allocate(unsigned long, void const*) (new_allocator.h:127)
+==7929==    by 0x416D19: allocate (allocator.h:197)
+==7929==    by 0x416D19: std::allocator_traits<std::allocator<std::_Sp_counted_ptr_inplace<inode, std::allocator<inode>, (__gnu_cxx::_Lock_policy)2> > >::allocate(std::allocator<std::_Sp_counted_ptr_inplace<inode, std::allocator<inode>, (__gnu_cxx::_Lock_policy)2> >&, unsigned long) (alloc_traits.h:460)
+==7929==    by 0x41664D: std::__allocated_ptr<std::allocator<std::_Sp_counted_ptr_inplace<inode, std::allocator<inode>, (__gnu_cxx::_Lock_policy)2> > > std::__allocate_guarded<std::allocator<std::_Sp_counted_ptr_inplace<inode, std::allocator<inode>, (__gnu_cxx::_Lock_policy)2> > >(std::allocator<std::_Sp_counted_ptr_inplace<inode, std::allocator<inode>, (__gnu_cxx::_Lock_policy)2> >&) (allocated_ptr.h:97)
+==7929==    by 0x4160FE: std::__shared_count<(__gnu_cxx::_Lock_policy)2>::__shared_count<inode, std::allocator<inode>, file_type>(inode*&, std::_Sp_alloc_shared_tag<std::allocator<inode> >, file_type&&) (shared_ptr_base.h:648)
+==7929==    by 0x415D1B: std::__shared_ptr<inode, (__gnu_cxx::_Lock_policy)2>::__shared_ptr<std::allocator<inode>, file_type>(std::_Sp_alloc_shared_tag<std::allocator<inode> >, file_type&&) (shared_ptr_base.h:1342)
+==7929==    by 0x415878: std::shared_ptr<inode>::shared_ptr<std::allocator<inode>, file_type>(std::_Sp_alloc_shared_tag<std::allocator<inode> >, file_type&&) (shared_ptr.h:409)
+==7929==    by 0x41524E: std::shared_ptr<inode> std::allocate_shared<inode, std::allocator<inode>, file_type>(std::allocator<inode> const&, file_type&&) (shared_ptr.h:863)
+==7929==    by 0x414AFE: std::shared_ptr<inode> std::make_shared<inode, file_type>(file_type&&) (shared_ptr.h:879)
+==7929==    by 0x413C13: inode_state::inode_state() (file_sys.cpp:59)
+==7929==    by 0x419242: main (main.cpp:56)
+==7929== 
+==7929== LEAK SUMMARY:
+==7929==    definitely lost: 40 bytes in 1 blocks
+==7929==    indirectly lost: 1,222 bytes in 32 blocks
+==7929==      possibly lost: 0 bytes in 0 blocks
+==7929==    still reachable: 0 bytes in 0 blocks
+==7929==         suppressed: 0 bytes in 0 blocks
+==7929== 
+==7929== For lists of detected and suppressed errors, rerun with: -s
+==7929== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

@@ -175,6 +175,35 @@ void fn_exit(inode_state &state, const wordvec &words)
    DEBUGF('c', state);
    DEBUGF('c', words);
 
+   state.set_cwd(state.get_root());
+   inode_ptr cwd = state.get_cwd();
+   directory_entries dirents = cwd->get_contents()->get_dirents();
+   wordvec new_words;
+   new_words.push_back("rmr");     
+     
+   for (auto itr = dirents.begin(); itr != dirents.end(); ++itr)
+   {
+      if (!itr->second->is_directory())
+      {
+         new_words.push_back(itr->first);
+         fn_rm(state, new_words);
+         new_words.pop_back();
+         continue;
+      }
+ 
+      if(itr->first == "." || itr->first == "..")
+          continue;
+
+       new_words.push_back(itr->first);
+       fn_rmr(state, new_words);
+       new_words.pop_back();
+   }
+
+   new_words.push_back(".");
+   fn_rm(state, new_words);
+   new_words[1] = "..";
+   fn_rm(state, new_words);
+
    if (words.size() < 2)
    {
       exec::status(0);
@@ -529,8 +558,10 @@ void fn_rm_sngl(inode_state &state, const wordvec &words, inode_ptr old)
                        words[1] +
                        "': No such file or directory");
    }
+
    inode_ptr child = dirents.at(words[1]);
-   if (cwd_->is_directory() && child->is_directory())
+
+   if (child->is_directory())
    {
       directory_entries child_dirents =
           child->get_contents()->get_dirents();
@@ -540,6 +571,14 @@ void fn_rm_sngl(inode_state &state, const wordvec &words, inode_ptr old)
          throw file_error("rm: cannot remove '" +
                           words[1] +
                           "': Is a directory");
+      }
+
+      if (cwd_ != child)
+      { 
+         wordvec new_words;
+         new_words.push_back("");
+         new_words.push_back(words[1] + "/.");
+         fn_rm(state, new_words); 
       }
    }
 
@@ -629,7 +668,8 @@ void fn_rmr(inode_state &state, const wordvec &words)
          new_words.pop_back();
          continue;
       }
-      else if (itr->first == "." || itr->first == "..")
+      
+      if (itr->first == "." || itr->first == "..")
          continue;
 
       new_words.push_back(itr->first);
