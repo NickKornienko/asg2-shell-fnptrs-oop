@@ -527,6 +527,8 @@ void fn_rmr(inode_state &state, const wordvec &words)
    }
 
    state.set_cwd(old_cwd);
+   if(words[0] == "rmr")
+      fn_rm(state, words);
 
    DEBUGF('c', state);
    DEBUGF('c', words);
