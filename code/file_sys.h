@@ -1,4 +1,6 @@
 // $Id: file_sys.h,v 1.13 2022-01-26 16:10:48-08 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 #ifndef INODE_H
 #define INODE_H

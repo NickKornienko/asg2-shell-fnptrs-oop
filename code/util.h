@@ -1,4 +1,6 @@
 // $Id: util.h,v 1.16 2021-12-20 12:55:34-08 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 // util -
 //    A utility to provide various services not conveniently

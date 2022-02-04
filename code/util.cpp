@@ -1,4 +1,6 @@
 // $Id: util.cpp,v 1.15 2021-09-26 12:41:17-07 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 #include <cstdlib>
 #include <unistd.h>

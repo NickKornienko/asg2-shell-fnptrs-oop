@@ -1,4 +1,6 @@
 // $Id: debug.cpp,v 1.16 2021-10-29 21:18:11-07 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 #include <climits>
 #include <iostream>

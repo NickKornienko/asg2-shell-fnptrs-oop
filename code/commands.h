@@ -1,4 +1,6 @@
 // $Id: commands.h,v 1.12 2021/12/20 20:55:34 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 #ifndef COMMANDS_H
 #define COMMANDS_H

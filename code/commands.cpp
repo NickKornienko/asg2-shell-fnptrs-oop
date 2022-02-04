@@ -1,4 +1,6 @@
 // $Id: commands.cpp,v 1.27 2022-01-28 18:11:56-08 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 #include "commands.h"
 #include "debug.h"

@@ -1,4 +1,6 @@
 // $Id: main.cpp,v 1.12 2021-09-26 12:41:17-07 - - $
+// James Garrett jaagarre
+// Nick Kornienko nkornien
 
 #include <cstdlib>
 #include <iostream>
