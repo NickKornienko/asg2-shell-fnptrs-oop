@@ -61,43 +61,65 @@ vector<string> tokenize_path(string path)
 
 void fn_cat(inode_state &state, const wordvec &words)
 {
-   if (words.size() != 2)
-      throw file_error("cat: missing or extra operand");
+   if (words.size() < 2)
+      throw file_error("cat: missing operand");
 
    inode_ptr old_cwd = state.get_cwd();
 
-   vector<string> tokens = tokenize_path(words[1]);
-
-   for (size_t j = 0; j < tokens.size() - 1; j++)
+   for(size_t i = 1; i < words.size(); i++)
    {
-      wordvec word_vec;
-      word_vec.push_back("");
-      word_vec.push_back(tokens[j]);
+      vector<string> tokens = tokenize_path(words[i]);
 
-      try
+      for (size_t j = 0; j < tokens.size() - 1; j++)
       {
-         fn_cd(state, word_vec);
+         wordvec word_vec;
+         word_vec.push_back("");
+         if(tokens[j] != "")
+            word_vec.push_back(tokens[j]);
+
+         try
+         {
+            fn_cd(state, word_vec);
+         }
+         catch (file_error &)
+         {
+            state.set_cwd(old_cwd);
+            throw file_error("cat: " +
+                             words[1] +
+                             ": No such file or directory");
+         }
       }
-      catch (file_error &)
+
+      string final_token = tokens[tokens.size() - 1];
+      directory_entries dirents =
+          state.get_cwd()->get_contents()->get_dirents();
+      
+      if (!dirents.count(final_token)) 
       {
-         throw file_error("cannot create directory " +
+         state.set_cwd(old_cwd);
+         throw file_error("cat: " +
                           words[1] +
                           ": No such file or directory");
       }
+
+      inode_ptr file = dirents.at(final_token);
+
+      if(file->is_directory())
+      {
+         state.set_cwd(old_cwd);
+         throw file_error("cat: " +
+                          words[i] +
+                          ": Is a directory");
+ 
+      }
+      
+      wordvec text = file->get_contents()->readfile();
+
+      for (size_t j = 0; j < text.size(); j++)
+         cout << text.at(j) << ' ';
+      cout << "\n";
+      state.set_cwd(old_cwd);  
    }
-
-   string final_token = tokens[tokens.size() - 1];
-   directory_entries dirents =
-       state.get_cwd()->get_contents()->get_dirents();
-
-   inode_ptr file = dirents.at(final_token);
-   wordvec text = file->get_contents()->readfile();
-
-   for (size_t i = 0; i < text.size(); i++)
-      cout << text.at(i) << ' ';
-   cout << "\n";
-
-   state.set_cwd(old_cwd);
 
    DEBUGF('c', state);
    DEBUGF('c', words);
@@ -150,7 +172,15 @@ void fn_cd(inode_state &state, const wordvec &words)
    {
       wordvec word_vec;
       word_vec.push_back("");
+      
+      if(i == 0 && tokens[i] == "")
+      {
+         state.set_cwd(state.get_root());
+         continue; 
+      }
+      
       word_vec.push_back(tokens[i]);
+  
       try
       {
          fn_cd_single(state, word_vec);
@@ -231,24 +261,16 @@ void fn_ls(inode_state &state, const wordvec &words)
    {
       wordvec new_words;
       new_words.push_back("");
+      new_words.push_back(words[1]);
 
-      if (words[1] == "/")
+      try
       {
-         new_words.push_back("");
          fn_cd(state, new_words);
       }
-      else
+      catch (file_error &)
       {
-         new_words.push_back(words[1]);
-         try
-         {
-            fn_cd(state, new_words);
-         }
-         catch (file_error &)
-         {
-            state.set_cwd(old_cwd);
-            throw file_error(words[1] + ": No such file or directory");
-         }
+         state.set_cwd(old_cwd);
+         throw file_error(words[1] + ": No such file or directory");
       }
    }
 
@@ -373,7 +395,8 @@ void fn_make(inode_state &state, const wordvec &words)
    {
       wordvec word_vec;
       word_vec.push_back("");
-      word_vec.push_back(tokens[j]);
+      if(tokens[j] != "")
+            word_vec.push_back(tokens[j]);
 
       try
       {
@@ -454,8 +477,9 @@ void fn_mkdir(inode_state &state, const wordvec &words)
       {
          wordvec word_vec;
          word_vec.push_back("");
-         word_vec.push_back(tokens[j]);
-
+         if(tokens[j] != "")
+            word_vec.push_back(tokens[j]);
+         
          try
          {
             fn_cd(state, word_vec);
@@ -598,14 +622,33 @@ void fn_rm(inode_state &state, const wordvec &words)
 
    for (size_t i = 1; i < words.size(); i++)
    {
+      wordvec word_vec;
+      word_vec.push_back("");
+      word_vec.push_back(words[i]);
+      try
+      {
+         fn_cd(state, word_vec);
+         word_vec[1] = "..";
+         fn_cd(state, word_vec);
+      }
+      catch (file_error &)
+      {
+         state.set_cwd(old_cwd);
+         throw file_error("cannot remove " +
+                             words[i] +
+                             ": No such file or directory");
+  
+      }
       vector<string> tokens = tokenize_path(words[i]);
 
-      for (size_t j = 0; j < tokens.size() - 1; j++)
+      /*for (size_t j = 0; j < tokens.size() - 1; j++)
       {
          wordvec word_vec;
          word_vec.push_back("");
-         word_vec.push_back(tokens[j]);
-
+         if(tokens[j] != "")
+         {
+            word_vec.push_back(tokens[j]);
+         }
          try
          {
             fn_cd(state, word_vec);
@@ -617,10 +660,14 @@ void fn_rm(inode_state &state, const wordvec &words)
                              words[i] +
                              ": No such file or directory");
          }
-      }
+      }*/
 
       wordvec final_token;
       final_token.push_back("");
+      //if(tokens[tokens.size() - 1] == "")
+      //   final_token.push_back(".");
+      //else
+      cout << tokens[tokens.size() - 1] << "\n";
       final_token.push_back(tokens[tokens.size() - 1]);
       fn_rm_sngl(state, final_token, old_cwd);
       state.set_cwd(old_cwd);
